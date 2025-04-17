@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5000/api/auth'; // ✅ Absolute backend URL
+const API_BASE = 'http://localhost:5000/api/auth'; // Absolute backend URL
 
 export default function Login({ setToken }) {
   const navigate = useNavigate();
@@ -9,17 +9,17 @@ export default function Login({ setToken }) {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  // ✅ Listen for messages from Google OAuth popup
+  // Listen for messages from Google OAuth popup
   useEffect(() => {
     const handleMessage = (event) => {
-      if (event.origin !== 'http://localhost:5000') return; // ✅ Must match backend origin
+      if (event.origin !== 'http://localhost:5000') return; // Must match backend origin
 
       const { token } = event.data;
 
       if (token) {
         localStorage.setItem('token', token);
         setToken(token);
-        navigate('/layout'); // ✅ Navigate after successful login
+        navigate('/layout'); // Navigate after successful login
       }
     };
 

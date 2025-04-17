@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5000/api/auth'; // ✅ Absolute backend URL
+const API_BASE = 'http://localhost:5000/api/auth'; // Absolute backend URL
 
 export default function Register() {
   const navigate = useNavigate();
