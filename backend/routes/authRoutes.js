@@ -16,12 +16,14 @@ router.post('/approved-emails', verifyToken, checkRole(['admin']), authControlle
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login', session: false }), // Set session: false
+    passport.authenticate('google', { failureRedirect:'./login', session: false,failureMessage: true }), // Set session: false
     (req, res) => {
         // Successful authentication, create JWT and redirect
         const token = jwt.sign({ _id: req.user._id, email: req.user.email, role: req.user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
-        res.redirect(`${process.env.FRONTEND_URL}/auth/success?token=${token}`);
+        res.redirect(`${process.env.FRONTEND_URL}/oauth/success?token=${token}`);
     }
 );
+
+  
 
 module.exports = router;

@@ -18,17 +18,14 @@ exports.checkEmail = async (req, res) => {
     }
 };
 
-// Register user (optional if you want email/password signup)
+// Register user
 exports.register = async (req, res) => {
     try {
-        const { email, password, displayName } = req.body;
+        const { email, password, displayName, role } = req.body;
         if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
 
         const existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ message: 'User already exists' });
-
-        const approvedEmail = await ApprovedEmail.findOne({ email, isActive: true });
-        if (!approvedEmail) return res.status(403).json({ message: 'Email not approved for access' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -36,10 +33,20 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             displayName,
-            role: approvedEmail.role
+            role: role || 'user', // Default role
         });
 
         await user.save();
+
+        // Automatically approve regular users, but not admins/riders
+        if (role !== 'admin' && role !== 'rider') {
+            const newApprovedEmail = new ApprovedEmail({
+                email: email,
+                isActive: true,
+                role: 'user' // Default role
+            });
+            await newApprovedEmail.save();
+        }
 
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
@@ -116,3 +123,22 @@ exports.addApprovedEmail = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+// Approve email endpoint (require authentication)
+exports.approveEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: 'Email is required' });
+
+        const approvedEmail = await ApprovedEmail.findOne({ email });
+        if (!approvedEmail) return res.status(404).json({ message: 'Email not found in approved list' });
+
+        approvedEmail.isActive = true;
+        await approvedEmail.save();
+
+        res.json({ message: 'Email approved successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
